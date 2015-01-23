@@ -154,7 +154,6 @@ sub elide {
  elide($text, 16, {truncate=>"ends"});   # -> "... is your b..."
 
  elide($text, 16, {marker=>"--"});       # -> "this is your b--"
- elide($text, 16, {marker=>"--"});       # -> "this is your b--"
 
  # multipart strings: we want to elide URL first, then the Downloading text,
  # then the speed
