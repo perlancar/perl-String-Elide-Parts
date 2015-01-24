@@ -212,7 +212,7 @@ Known options:
 L<Text::Elide> is simple, does not have many options, and elides at word
 boundaries.
 
-L<String::Truncate> has similar interface like String::Elide and has some
+L<String::Truncate> has similar interface like String::Elide::Parts and has some
 options.
 
 =cut
