@@ -71,6 +71,8 @@ sub elide {
             my $attrs = {};
             $attrs->{truncate} = $1 // $2
                 if $parts_attrs[$i] =~ /\btruncate=(?:"([^"]*)"|(\S+))/;
+            $attrs->{marker} = $1 // $2
+                if $parts_attrs[$i] =~ /\bmarker=(?:"([^"]*)"|(\S+))/;
             $attrs->{prio} = $1 // $2
                 if $parts_attrs[$i] =~ /\bprio(?:rity)?=(?:"([^"]*)"|(\S+))/;
             $parts_attrs[$i] = $attrs;
@@ -130,7 +132,7 @@ sub elide {
         $parts[$index] = _elide_part(
             $parts[$index],
             $part_len - ($parts_len-$len),
-            $marker,
+            $parts_attrs[$index]{marker} // $marker,
             $parts_attrs[$index]{truncate} // $truncate,
         );
         return join("", @parts);
@@ -156,8 +158,9 @@ Eliding string with no parts:
 
  elide($text, 16, {marker=>"--"});       # -> "this is your b--"
 
- # multipart strings: we want to elide URL first, then the Downloading text,
- # then the speed
+Eliding string with multiple parts marked with markup. We want to elide URL
+first (prio=3), then the C<Downloading> text (prio=2), then the speed (prio=1,
+default):
 
  $text = "<elspan prio=2>Downloading</elspan> <elspan prio=3 truncate=middle>http://www.example.com/somefile</elspan> 320.0k/5.5M";
  #                      0----5---10---15---20---25---30---35---40---45---50---55---60
@@ -175,11 +178,14 @@ Eliding string with no parts:
  elide($text, 15); # -> "..  320.0k/5.5M"
  elide($text, 13); # -> "  320.0k/5.5M"
  elide($text, 12); # -> "  320.0k/5.."
+ elide($text, 10); # -> "  320.0k.."
+ elide($text,  5); # -> "  3.."
+ #                      0----5---10---15---20---25---30---35---40---45---50---55---60
 
 
 =head1 DESCRIPTION
 
-String::Elide is similar to other string eliding modules, with one main
+String::Elide::Parts is similar to other string eliding modules, with one main
 difference: it accepts string marked with parts of different priorities. The
 goal is to retain more important information as much as possible when length is
 reduced.
@@ -191,10 +197,11 @@ reduced.
 
 Elide a string if length exceeds C<$len>.
 
-String can be marked with C<< <elspan prio=N truncate=T>...</elspan> >> so there
-can be multiple parts with different priorities and truncate direction. The
-default priority is 1. You can mark less important strings with higher priority
-to let it be elided first.
+String can be marked with C<< <elspan prio=N truncate=T marker=M>...</elspan> >>
+so there can be multiple parts with different priorities and truncate direction.
+The default priority is 1. You can mark less important strings with higher
+priority to let it be elided first. The markup will be removed from the string
+before eliding.
 
 Known options:
 

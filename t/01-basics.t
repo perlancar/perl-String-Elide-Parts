@@ -17,6 +17,7 @@ subtest "opt: truncate=right" => sub {
     is(elide("1234567890", 11, {truncate=>"right"}), "1234567890");
     is(elide("1234567890", 10, {truncate=>"right"}), "1234567890");
     is(elide("1234567890",  9, {truncate=>"right"}), "1234567..");
+    is(elide("1234567890",  9, {}                 ), "1234567.."); # right is the default
     is(elide("1234567890",  5, {truncate=>"right"}), "123..");
     is(elide("1234567890",  3, {truncate=>"right"}), "1..");
     is(elide("1234567890",  2, {truncate=>"right"}), "..");
@@ -66,21 +67,22 @@ subtest "opt: truncate=ends" => sub {
 };
 
 subtest "markup" => sub {
-    my $text = "<elspan prio=2>Downloading</elspan> <elspan prio=3 truncate=middle>http://www.example.com/somefile</elspan> 320.0k/5.5M";
+    my $text = "<elspan prio=2>Downloading</elspan> <elspan prio=3 truncate=middle marker=\"**\">http://www.example.com/somefile</elspan> 320.0k/5.5M";
     is(elide($text, 56), "Downloading http://www.example.com/somefile 320.0k/5.5M");
     is(elide($text, 55), "Downloading http://www.example.com/somefile 320.0k/5.5M");
-    is(elide($text, 50), "Downloading http://www.e..com/somefile 320.0k/5.5M");
-    is(elide($text, 45), "Downloading http://ww..m/somefile 320.0k/5.5M");
-    is(elide($text, 40), "Downloading http://..omefile 320.0k/5.5M");
-    is(elide($text, 35), "Downloading http..efile 320.0k/5.5M");
-    is(elide($text, 30), "Downloading ht..le 320.0k/5.5M");
-    is(elide($text, 25), "Downloading . 320.0k/5.5M");
+    is(elide($text, 50), "Downloading http://www.e**com/somefile 320.0k/5.5M");
+    is(elide($text, 45), "Downloading http://ww**m/somefile 320.0k/5.5M");
+    is(elide($text, 40), "Downloading http://**omefile 320.0k/5.5M");
+    is(elide($text, 35), "Downloading http**efile 320.0k/5.5M");
+    is(elide($text, 30), "Downloading ht**le 320.0k/5.5M");
+    is(elide($text, 25), "Downloading * 320.0k/5.5M");
     is(elide($text, 24), "Downloading  320.0k/5.5M");
     is(elide($text, 23), "Download..  320.0k/5.5M");
     is(elide($text, 20), "Downl..  320.0k/5.5M");
     is(elide($text, 15), "..  320.0k/5.5M");
     is(elide($text, 13), "  320.0k/5.5M");
-    is(elide($text, 12), "  320.0k/5..");
+    is(elide($text, 10), "  320.0k..");
+    is(elide($text,  5), "  3..");
 };
 
 DONE_TESTING:
