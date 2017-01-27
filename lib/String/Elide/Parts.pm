@@ -145,9 +145,10 @@ sub elide {
 
  use String::Elide qw(elide);
 
- # single string with no parts
+Eliding string with no parts:
 
  my $text = "this is your brain";
+ #                                            0----5---10---15---20
  elide($text, 16);                       # -> "this is your ..."
  elide($text, 16, {truncate=>"left"});   # -> "...is your brain"
  elide($text, 16, {truncate=>"middle"}); # -> "this is... brain"
@@ -159,6 +160,7 @@ sub elide {
  # then the speed
 
  $text = "<elspan prio=2>Downloading</elspan> <elspan prio=3 truncate=middle>http://www.example.com/somefile</elspan> 320.0k/5.5M";
+ #                      0----5---10---15---20---25---30---35---40---45---50---55---60
  elide($text, 56); # -> "Downloading http://www.example.com/somefile 320.0k/5.5M"
  elide($text, 55); # -> "Downloading http://www.example.com/somefile 320.0k/5.5M"
  elide($text, 50); # -> "Downloading http://www.e..com/somefile 320.0k/5.5M"
