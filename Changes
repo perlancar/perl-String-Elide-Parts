@@ -1,3 +1,10 @@
+0.04    2017-01-28 (PERLANCAR)
+
+	- [doc] Mention String::ElideLines.
+
+	- Fix regex (should use /s modifier).
+
+
 0.03    2017-01-28 (PERLANCAR)
 
 	- Forgot to remove debug prints.
