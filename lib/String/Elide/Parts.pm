@@ -169,7 +169,7 @@ sub elide {
 
 =head1 SYNOPSIS
 
- use String::Elide qw(elide);
+ use String::Elide::Parts qw(elide);
 
 Eliding string with no parts:
 
