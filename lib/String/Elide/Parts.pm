@@ -91,7 +91,6 @@ sub elide {
         # (re)calculate total len of all parts
         my $all_parts_len = 0;
         $all_parts_len += length($_) for @parts;
-        say "D:all_parts_len=$all_parts_len";
 
         # total len of all parts is short enough, we're done
         if ($all_parts_len <= $len) {
@@ -145,7 +144,6 @@ sub elide {
             if ($to_elide <= 0) {
                 # leave this part alone
             } elsif ($part_len <= $to_elide) {
-                say "D:eliminating part[$idx]";
                 # we need to eliminate this part
                 splice @parts, $idx, 1;
                 splice @parts_attrs, $idx, 1;
