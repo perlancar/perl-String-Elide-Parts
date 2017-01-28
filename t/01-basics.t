@@ -81,8 +81,8 @@ subtest "markup" => sub {
     is(elide($text, 20), "Downl..  320.0k/5.5M");
     is(elide($text, 15), "..  320.0k/5.5M");
     is(elide($text, 13), "  320.0k/5.5M");
-    is(elide($text, 10), "  320.0k..");
-    is(elide($text,  5), "  3..");
+    is(elide($text, 10), " 320.0k/..");
+    is(elide($text,  5), " 32..");
 };
 
 DONE_TESTING:

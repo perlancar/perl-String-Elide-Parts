@@ -48,7 +48,6 @@ sub elide {
     # split into parts by priority
     my @parts;
     my @parts_attrs;
-    my $parts_len = 0;
     while ($str =~ m#<elspan([^>]*)>(.*?)</elspan>|(.*?)(?=<elspan)|(.*)#g) {
         if (defined $1) {
             next unless length $2;
@@ -66,7 +65,6 @@ sub elide {
     }
     return "" unless @parts && $len > 0;
     for my $i (0..@parts-1) {
-        $parts_len += length($parts[$i]);
         if (defined $parts_attrs[$i]) {
             my $attrs = {};
             $attrs->{truncate} = $1 // $2
@@ -87,55 +85,83 @@ sub elide {
     # truncate is 'ends'
     my $flip = 0;
 
-    # elide and truncate part by part until str is short enough
-  PART:
+    # elide and truncate prio by prio until str is short enough
+  PRIO:
     while (1) {
-        if ($parts_len <= $len) {
+        # (re)calculate total len of all parts
+        my $all_parts_len = 0;
+        $all_parts_len += length($_) for @parts;
+        say "D:all_parts_len=$all_parts_len";
+
+        # total len of all parts is short enough, we're done
+        if ($all_parts_len <= $len) {
             return join("", @parts);
         }
 
-        # collect part indexes that have the largest priority
-        my @indexes;
+        # we still need to elide some parts. first collect part indexes that
+        # have the current largest priority.
         my $highest_prio;
         for (@parts_attrs) {
             $highest_prio = $_->{prio} if !defined($highest_prio) ||
                 $highest_prio < $_->{prio};
         }
-        for my $i (0..@parts_attrs-1) {
-            push @indexes, $i if $parts_attrs[$i]{prio} == $highest_prio;
+        my @high_indexes;
+        my $high_parts_len = 0;
+        for my $i (0..$#parts_attrs) {
+            if ($parts_attrs[$i]{prio} == $highest_prio) {
+                $high_parts_len += length $parts[$i];
+                push @high_indexes, $i;
+            }
         }
 
-        # pick which part (index) to elide
-        my $index;
-        if ($truncate eq 'left') {
-            $index = $indexes[0];
-        } elsif ($truncate eq 'middle') {
-            $index = $indexes[@indexes/2];
-        } elsif ($truncate eq 'ends') {
-            $index = $flip++ % 2 ? $indexes[0] : $indexes[-1];
-        } else { # right
-            $index = $indexes[-1];
+        if ($all_parts_len - $high_parts_len >= $len) {
+            # we need to fully eliminate all the highest parts part then search
+            # for another set of parts
+            for (reverse @high_indexes) {
+                splice @parts, $_, 1;
+                splice @parts_attrs, $_, 1;
+                next PRIO;
+            }
         }
 
-        my $part_len = length($parts[$index]);
-        if ($parts_len - $part_len >= $len) {
-            # we need to fully eliminate this part then search for another part
-            #say "D:eliminating part (prio=$highest_prio): <$parts[$index]>";
-            $parts_len -= $part_len;
-            splice @parts, $index, 1;
-            splice @parts_attrs, $index, 1;
-            next PART;
-        }
+        # elide all to-be-elided parts equally
 
-        # we just need to elide this part and return the result
-        #say "D:eliding part (prio=$highest_prio): <$parts[$index]>";
-        $parts[$index] = _elide_part(
-            $parts[$index],
-            $part_len - ($parts_len-$len),
-            $parts_attrs[$index]{marker} // $marker,
-            $parts_attrs[$index]{truncate} // $truncate,
-        );
-        return join("", @parts);
+        # after this position, must elide a total of this number of characters
+        # after this position
+        my @must_elide_total_len_after_this;
+        my $tot_to_elide = $all_parts_len - $len;
+        for my $i (0..$#high_indexes) {
+            $must_elide_total_len_after_this[$i] =
+                int( ($i+1)/@high_indexes * $tot_to_elide );
+        }
+        # calculate how many characters to truncate for each part
+        my $tot_already_elided = 0;
+        my $tot_still_to_elide = 0;
+        for my $i (reverse 0..$#high_indexes) {
+            my $idx = $high_indexes[$i];
+            my $part_len = length $parts[$idx];
+            my $to_elide = $must_elide_total_len_after_this[$#high_indexes - $i] -
+                $tot_already_elided + $tot_still_to_elide;
+            if ($to_elide <= 0) {
+                # leave this part alone
+            } elsif ($part_len <= $to_elide) {
+                say "D:eliminating part[$idx]";
+                # we need to eliminate this part
+                splice @parts, $idx, 1;
+                splice @parts_attrs, $idx, 1;
+                $tot_already_elided += $part_len;
+                $tot_still_to_elide += ($to_elide - $part_len);
+            } else {
+                $parts[$idx] = _elide_part(
+                    $parts[$idx],
+                    $part_len - $to_elide,
+                    $parts_attrs[$idx]{marker} // $marker,
+                    $parts_attrs[$idx]{truncate} // $truncate,
+                );
+                $tot_already_elided += $to_elide;
+                $tot_still_to_elide = 0;
+            }
+        }
 
     } # while 1
 }
@@ -177,9 +203,8 @@ default):
  elide($text, 20); # -> "Downl..  320.0k/5.5M"
  elide($text, 15); # -> "..  320.0k/5.5M"
  elide($text, 13); # -> "  320.0k/5.5M"
- elide($text, 12); # -> "  320.0k/5.."
- elide($text, 10); # -> "  320.0k.."
- elide($text,  5); # -> "  3.."
+ elide($text, 10); # -> " 320.0k/.."
+ elide($text,  5); # -> " 32.."
  #                      0----5---10---15---20---25---30---35---40---45---50---55---60
 
 
