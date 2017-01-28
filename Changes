@@ -1,3 +1,10 @@
+0.05    2017-01-28 (PERLANCAR)
+
+	- No functional changes.
+
+	- [Bugfix] D'oh, mistyped mentioned module name.
+
+
 0.04    2017-01-28 (PERLANCAR)
 
 	- [doc] Mention String::ElideLines.
