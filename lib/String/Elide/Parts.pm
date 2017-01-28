@@ -81,10 +81,6 @@ sub elide {
 
     #use DD; dd \@parts; dd \@parts_attrs;
 
-    # used to flip and flop between eliding left and right end, used when
-    # truncate is 'ends'
-    my $flip = 0;
-
     # elide and truncate prio by prio until str is short enough
   PRIO:
     while (1) {
