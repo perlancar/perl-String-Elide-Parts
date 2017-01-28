@@ -1,3 +1,8 @@
+0.03    2017-01-28 (PERLANCAR)
+
+	- Forgot to remove debug prints.
+
+
 0.02    2017-01-28 (PERLANCAR)
 
         - Elide all parts that have the highest priority equally instead of
