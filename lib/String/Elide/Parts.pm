@@ -48,7 +48,7 @@ sub elide {
     # split into parts by priority
     my @parts;
     my @parts_attrs;
-    while ($str =~ m#<elspan([^>]*)>(.*?)</elspan>|(.*?)(?=<elspan)|(.*)#g) {
+    while ($str =~ m#<elspan([^>]*)>(.*?)</elspan>|(.*?)(?=<elspan)|(.*)#gs) {
         if (defined $1) {
             next unless length $2;
             push @parts, $2;
