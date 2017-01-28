@@ -44,6 +44,7 @@ sub elide {
     $opts //= {};
     my $truncate  = $opts->{truncate} // 'right';
     my $marker = $opts->{marker} // '..';
+    my $default_prio = $opts->{default_prio} // 1;
 
     # split into parts by priority
     my @parts;
@@ -75,7 +76,7 @@ sub elide {
                 if $parts_attrs[$i] =~ /\bprio(?:rity)?=(?:"([^"]*)"|(\S+))/;
             $parts_attrs[$i] = $attrs;
         } else {
-            $parts_attrs[$i] = {prio=>1};
+            $parts_attrs[$i] = {prio=>$default_prio};
         }
     }
 
@@ -229,6 +230,8 @@ Known options:
 =item * marker => str (default: '..')
 
 =item * truncate => 'left'|'middle'|'middle'|'ends' (default: 'right')
+
+=item * default_prio => int (default: 1)
 
 =back
 

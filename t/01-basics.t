@@ -85,5 +85,11 @@ subtest "markup" => sub {
     is(elide($text,  5), " 32..");
 };
 
+subtest "opt:default_prio" => sub {
+    my $text = "aaaaa<elspan prio=1>|</elspan>bbbbb";
+    is(elide($text, 6), ".bb.."); # shouldn't it be 6 chars and not 5?
+    is(elide($text, 5, {default_prio=>2}), "..|..");
+};
+
 DONE_TESTING:
 done_testing();
