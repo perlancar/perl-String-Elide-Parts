@@ -247,4 +247,6 @@ boundaries.
 L<String::Truncate> has similar interface like String::Elide::Parts and has some
 options.
 
+L<String::ElideLines> is based on this module but works on a line-basis.
+
 =cut
