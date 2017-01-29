@@ -130,6 +130,8 @@ sub elide {
             $must_elide_total_len_after_this[$i] =
                 int( ($i+1)/@high_indexes * $tot_to_elide );
         }
+        #use DD; dd \@must_elide_total_len_after_this;
+
         # calculate how many characters to truncate for each part
         my $tot_already_elided = 0;
         my $tot_still_to_elide = 0;
@@ -137,24 +139,31 @@ sub elide {
             my $idx = $high_indexes[$i];
             my $part_len = length $parts[$idx];
             my $to_elide = $must_elide_total_len_after_this[$#high_indexes - $i] -
-                $tot_already_elided + $tot_still_to_elide;
+                $tot_already_elided;
+            #say "D:[", ($i+1), "/", ~~@high_indexes, "] must_elide_total_len_after_this=", $must_elide_total_len_after_this[$#high_indexes-$i], " to_elide=$to_elide";
             if ($to_elide <= 0) {
                 # leave this part alone
+                #say "D:  leave alone <$parts[$idx]>";
             } elsif ($part_len <= $to_elide) {
                 # we need to eliminate this part
+                #say "D:  eliminate <$parts[$idx]>";
                 splice @parts, $idx, 1;
                 splice @parts_attrs, $idx, 1;
                 $tot_already_elided += $part_len;
                 $tot_still_to_elide += ($to_elide - $part_len);
+                #say "D:  tot_already_elided=$tot_already_elided, tot_still_to_elide=$tot_still_to_elide";
             } else {
+                #say "D:  elide <$parts[$idx]>";
                 $parts[$idx] = _elide_part(
                     $parts[$idx],
                     $part_len - $to_elide,
                     $parts_attrs[$idx]{marker} // $marker,
                     $parts_attrs[$idx]{truncate} // $truncate,
                 );
+                #say "D:  elide result <$parts[$idx]>";
                 $tot_already_elided += $to_elide;
                 $tot_still_to_elide = 0;
+                #say "D:  tot_already_elided=$tot_already_elided, tot_still_to_elide=$tot_still_to_elide";
             }
         }
 
